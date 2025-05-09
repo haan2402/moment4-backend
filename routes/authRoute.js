@@ -14,12 +14,6 @@ router.post("/register", async (req, res) => {
             return res.status(400).json({error: "Ogiltig inmatning, alla fält måste fyllas i!"});
         }
 
-        //kontroll om användare redan finns
-        const alreadyUser = await User.findOne({username});
-        if(alreadyUser) {
-            return res.status(400).json({error:"Denna användare finns redan..."});
-        }
-
         //korrekt registrering av användare
         const user = new User({ username, password, fullname, email });
         await user.save();
@@ -42,11 +36,18 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({error: "Ogiltig inmatning, alla fält måste fyllas i!"});
         }
 
-        //kollar om det är giltiga värden
-        if(username === "hanna" && password === "password") {
-            res.status(200).json({message: "Inloggning lyckades!"});
+        //kontroll om användare redan finns
+        const user = await User.findOne({username});
+        if(!user) {
+            return res.status(401).json({error:"Fel användarnamn/lösenord"});
+        }
+
+        //kontroll lösenord
+        const passwordMatch = await user.comparePassword(password);
+        if(!passwordMatch) {
+            return res.status(401).json({error:"Fel användarnamn/lösenord"});
         } else {
-            res.status(401).json({error: "Ogiltigt användarnamn/lösenord"});
+            res.status(200).json({message: "Användare inloggad!"});
         }
 
     } catch (error) {
