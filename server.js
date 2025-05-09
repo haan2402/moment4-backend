@@ -19,9 +19,6 @@ mongoose.connect(process.env.DATABASE).then(() => {
     console.log("Går inte att ansluta till databas: " + error);
 });
 
-//model för user
-const User = require("./models/User");
-
 //startar applikation
 app.listen(port, () => {
     console.log(`Server is running on: http://localhost:${port}`);

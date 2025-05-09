@@ -2,6 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
+const User = require("../models/User");
 
 //lägger till ny användare
 router.post("/register", async (req, res) => {
@@ -13,11 +14,21 @@ router.post("/register", async (req, res) => {
             return res.status(400).json({error: "Ogiltig inmatning, alla fält måste fyllas i!"});
         }
 
+        //kontroll om användare redan finns
+        const alreadyUser = await User.findOne({username});
+        if(alreadyUser) {
+            return res.status(400).json({error:"Denna användare finns redan..."});
+        }
+
+        //korrekt registrering av användare
+        const user = new User({ username, password, fullname, email });
+        await user.save();
+
         //korrekta värden
         res.status(201).json({message: "Användare skapad!"});
 
     } catch (error) {
-        res.status(500).json({error: "Error with server"});
+        res.status(500).json({error: "Error with server, register"});
     }
 });
 
