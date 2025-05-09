@@ -3,6 +3,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 //lägger till ny användare
 router.post("/register", async (req, res) => {
@@ -47,7 +48,14 @@ router.post("/login", async (req, res) => {
         if(!passwordMatch) {
             return res.status(401).json({error:"Fel användarnamn/lösenord"});
         } else {
-            res.status(200).json({message: "Användare inloggad!"});
+            //skapar jwt
+            const payload = { username: username};
+            const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '1h'});
+            const response = {
+                message: "Användare inloggad!",
+                token: token
+            }
+            res.status(200).json({response});
         }
 
     } catch (error) {
