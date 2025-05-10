@@ -3,11 +3,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const authRoute = require("./routes/authRoute");
+const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+app.use(cors());
 app.use(express.json());
 
 //routing
@@ -28,11 +30,13 @@ function authenticateToken(req, res, next) {
 
     //om token är korrekt så blir det next och skickad till skyddad token
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
-        if(err) return res.status(403).json({message: "Ogiltig JWT"});
+        if(err) {
+            return res.status(403).json({message: "Ogiltig JWT"});
+        }
 
         req.user = user;
         next();
-    })
+    });
 }
 
 //ansluter till MongoDB databas
