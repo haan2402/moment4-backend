@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const authenticateToken = require("../middleware/auth");
 
 //lägger till ny användare
 router.post("/register", async (req, res) => {
@@ -50,7 +51,7 @@ router.post("/login", async (req, res) => {
         } else {
             //skapar jwt
             const payload = { username: username};
-            const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '1h'});
+            const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: '24h'});
             const response = {
                 message: "Användare inloggad!",
                 token: token
@@ -59,6 +60,16 @@ router.post("/login", async (req, res) => {
         }
 
     } catch (error) {
+        res.status(500).json({error: "Error with server"});
+    }
+});
+
+//läser ut registrerade användare
+router.get("/users", authenticateToken, async (req, res) => {
+    try {
+        const users = await User.find({}, "-password");
+        res.status(200).json({users});
+    } catch(error) {
         res.status(500).json({error: "Error with server"});
     }
 });
